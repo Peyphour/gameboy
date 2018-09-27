@@ -712,9 +712,6 @@ void core_setup_operations(core *c) {
     core_register_op(c, 0xca, (operation) {
             "JP Z,nn", 2, jp_z_nn
     });
-    core_register_op(c, 0xcb, (operation) {
-            "Ext ops", 0, ext_ops
-    });
     core_register_op(c, 0xcc, (operation) {
             "CALL Z,nn", 2, call_z_nn
     });

@@ -164,9 +164,39 @@ void or_e(core *c, uint8_t *args);
 void or_h(core *c, uint8_t *args);
 void or_l(core *c, uint8_t *args);
 void or_hl(core *c, uint8_t *args);
+void ldi_hl_a(core *c, uint8_t *args);
+void ldi_a_hl(core *c, uint8_t *args);
+void ldd_hl_a(core *c, uint8_t *args);
+void ldd_a_hl(core *c, uint8_t *args);
+void adc_a_a(core *c, uint8_t *args);
+void adc_a_b(core *c, uint8_t *args);
+void adc_a_c(core *c, uint8_t *args);
+void adc_a_d(core *c, uint8_t *args);
+void adc_a_e(core *c, uint8_t *args);
+void adc_a_h(core *c, uint8_t *args);
+void adc_a_l(core *c, uint8_t *args);
+void adc_a_hl(core *c, uint8_t *args);
+void sbc_a_a(core *c, uint8_t *args);
+void sbc_a_b(core *c, uint8_t *args);
+void sbc_a_c(core *c, uint8_t *args);
+void sbc_a_d(core *c, uint8_t *args);
+void sbc_a_e(core *c, uint8_t *args);
+void sbc_a_h(core *c, uint8_t *args);
+void sbc_a_l(core *c, uint8_t *args);
+void sbc_a_hl(core *c, uint8_t *args);
+void cpl(core *c, uint8_t *args);
 
 void jr_nz_n(core *c, uint8_t *args);
+void jr_z_n(core *c, uint8_t *args);
+void jr_nc_n(core *c, uint8_t *args);
+void jr_c_n(core *c, uint8_t *args);
 void jr_n(core *c, uint8_t *args);
 
+void scf(core *c, uint8_t *args);
+void ccf(core *c, uint8_t *args);
+
+void daa(core *c, uint8_t *args);
+void halt(core *c, uint8_t *args);
+void stop(core *c, uint8_t *args);
 void xx(core *c, uint8_t *args);
 #endif //GAMEBOY_OPS_H

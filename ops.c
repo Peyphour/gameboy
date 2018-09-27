@@ -6,47 +6,13 @@
 #include "core.h"
 #include "main.h"
 
-/**
- * unique
-[ 'NOP',
-  'LD',
-  'INC',
-  'DEC',
-  'RLCA',
-  'ADD',
-  'RRCA',
-  'STOP',
-  'RLA',
-  'JR',
-  'RRA',
-  'DAA',
-  'CPL',
-  'SCF',
-  'CCF',
-  'HALT',
-  'ADC',
-  'SUB',
-  'SBC',
-  'AND',
-  'XOR',
-  'OR',
-  'CP',
-  'RET',
-  'POP',
-  'JP',
-  'CALL',
-  'PUSH',
-  'RST',
-  'PREFIX',
-  'RETI',
-  'LDH',
-  'DI',
-  'EI' ]
- */
-
 void noop(core *core, uint8_t *args) {
     (void) core;
     (void) args;
+}
+
+void jump(core *core, uint16_t location) {
+    core->registers.pc += location;
 }
 
 void load(uint8_t *from, uint8_t *to) {
@@ -222,6 +188,29 @@ void add16(core *c, uint16_t *from, uint16_t *to) {
     if((*from & 0x0fff) + (*to & 0x0fff) > 0x0fff)
         core_set_flag(c, HALF);
     *to += *from;
+}
+
+void adc(core *c, uint8_t *from) {
+    uint8_t carry = (uint8_t) (core_get_flag(c, CARRY) ? 1 : 0);
+    if(c->registers.a + *from + carry == 0)
+        core_set_flag(c, ZERO);
+    core_unset_flag(c, SUB);
+    if((int) c->registers.a + *from + carry > 0xff)
+        core_set_flag(c, CARRY);
+    if(((c->registers.a & 0x0f) + (*from & 0x0f) + carry) > 0x0f)
+        core_set_flag(c, HALF);
+}
+
+void sbc(core *c, uint8_t *from) {
+    uint8_t carry = (uint8_t) (core_get_flag(c, CARRY) ? 1 : 0);
+    uint8_t result = c->registers.a - *from - carry;
+    if(!result)
+        core_set_flag(c, ZERO);
+    core_set_flag(c, SUB);
+    if((int) c->registers.a + *from + carry > 0xff)
+        core_set_flag(c, CARRY);
+    if((c->registers.a ^ *from ^ result) & (1 << 4))
+        core_set_flag(c, HALF);
 }
 
 void sub(core *c, uint8_t *target) {
@@ -696,13 +685,145 @@ void or_hl(core *c, uint8_t *args) {
     or(c, &c->ram[c->registers.hl]);
 }
 
+void ldi_hl_a(core *c, uint8_t *args) {
+    load(&c->registers.a, &c->ram[c->registers.hl]);
+    inc16(&c->registers.hl);
+}
+
+void ldi_a_hl(core *c, uint8_t *args) {
+    load(&c->ram[c->registers.hl], &c->registers.a);
+    inc16(&c->registers.hl);
+}
+
+void ldd_hl_a(core *c, uint8_t *args) {
+    load(&c->registers.a, &c->ram[c->registers.hl]);
+    dec16(&c->registers.hl);
+}
+
+void ldd_a_hl(core *c, uint8_t *args) {
+    load(&c->ram[c->registers.hl], &c->registers.a);
+    dec16(&c->registers.hl);
+}
+
+void adc_a_a(core *c, uint8_t *args) {
+    adc(c, &c->registers.a);
+}
+void adc_a_b(core *c, uint8_t *args) {
+    adc(c, &c->registers.b);
+}
+void adc_a_c(core *c, uint8_t *args) {
+    adc(c, &c->registers.c);
+}
+void adc_a_d(core *c, uint8_t *args) {
+    adc(c, &c->registers.d);
+}
+void adc_a_e(core *c, uint8_t *args) {
+    adc(c, &c->registers.e);
+}
+void adc_a_h(core *c, uint8_t *args) {
+    adc(c, &c->registers.h);
+}
+void adc_a_l(core *c, uint8_t *args) {
+    adc(c, &c->registers.l);
+}
+void adc_a_hl(core *c, uint8_t *args) {
+    adc(c, &c->ram[c->registers.hl]);
+}
+
+void sbc_a_a(core *c, uint8_t *args) {
+    sbc(c, &c->registers.a);
+}
+void sbc_a_b(core *c, uint8_t *args) {
+    sbc(c, &c->registers.b);
+}
+void sbc_a_c(core *c, uint8_t *args) {
+    sbc(c, &c->registers.c);
+}
+void sbc_a_d(core *c, uint8_t *args) {
+    sbc(c, &c->registers.d);
+}
+void sbc_a_e(core *c, uint8_t *args) {
+    sbc(c, &c->registers.e);
+}
+void sbc_a_h(core *c, uint8_t *args) {
+    sbc(c, &c->registers.h);
+}
+void sbc_a_l(core *c, uint8_t *args) {
+    sbc(c, &c->registers.l);
+}
+void sbc_a_hl(core *c, uint8_t *args) {
+    sbc(c, &c->ram[c->registers.hl]);
+}
+
 void jr_nz_n(core *c, uint8_t *args) {
     if(!core_get_flag(c, ZERO))
-        c->registers.pc += (int8_t )args[0];
+        jump(c, (int8_t) args[0]);
+}
+
+void jr_z_n(core *c, uint8_t *args) {
+    if(core_get_flag(c, ZERO))
+        jump(c, (int8_t) args[0]);
+}
+
+void jr_nc_n(core *c, uint8_t *args) {
+    if(!core_get_flag(c, CARRY))
+        jump(c, (int8_t) args[0]);
+}
+
+void jr_c_n(core *c, uint8_t *args) {
+    if(core_get_flag(c, CARRY))
+        jump(c, (int8_t) args[0]);
 }
 
 void jr_n(core *c, uint8_t *args) {
-    c->registers.pc += (int8_t) args[0];
+    jump(c, (int8_t) args[0]);
+}
+
+void cpl(core *c, uint8_t *args) {
+    c->registers.a = ~c->registers.a;
+    core_set_flag(c, SUB | HALF);
+}
+
+void scf(core *c, uint8_t *args) {
+    core_set_flag(c, CARRY);
+}
+
+void ccf(core *c, uint8_t *args) {
+    core_unset_flag(c, CARRY);
+}
+
+void daa(core *c, uint8_t *args) {
+    int result = c->registers.a;
+    if(core_get_flag(c, SUB)) {
+        if(core_get_flag(c, HALF)) {
+            result = ((result - 6) & 0xff);
+        }
+        if(core_get_flag(c, CARRY)) {
+            result = (result - 0x60) & 0xff;
+        }
+    } else {
+        if(core_get_flag(c, HALF) || (result & 0xf) > 9) {
+            result += 0x06;
+        }
+        if(core_get_flag(c, CARRY) || result > 0x9f) {
+            result += 0x60;
+        }
+    }
+    core_unset_flag(c, HALF);
+    if(result > 0xff) {
+        core_set_flag(c, CARRY);
+    }
+    c->registers.a = (uint8_t) (result & 0xff);
+    if(!result)
+        core_set_flag(c, ZERO);
+}
+
+void halt(core *c, uint8_t *args) {
+    exit(1);
+}
+
+void stop(core *c, uint8_t *args) {
+    exit(EXIT_SUCCESS);
 }
 
 void xx(core *c, uint8_t *args) {

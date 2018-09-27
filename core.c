@@ -69,3 +69,36 @@ void core_setup_operations(core *c) {
         "NOP", 0, noop
     });
 }
+
+void core_stack_push8(core *c, uint8_t val) {
+    core_ram_write(c, --c->registers.sp, val);
+}
+
+uint8_t core_stack_pop8(core *c) {
+    return core_ram_read(c, c->registers.sp++);
+}
+
+void core_stack_push16(core *c, uint16_t val) {
+    uint8_t lsb = (uint8_t) (val & 0xFF);
+    uint8_t msb = (uint8_t) ((val >> 8) & 0xFF);
+    core_stack_push8(c, lsb);
+    core_stack_push8(c, msb);
+}
+
+uint16_t core_stack_pop16(core *c) {
+    uint8_t msb = core_stack_pop8(c);
+    uint8_t lsb = core_stack_pop8(c);
+    return (msb << 8 | lsb);
+}
+
+void core_set_flag(core *c, flags f) {
+    c->registers.f |= f;
+}
+
+void core_unset_flag(core *c, flags f) {
+    c->registers.f &= ~f;
+}
+
+void core_toggle_flag(core *c, flags f) {
+    c->registers.f ^= f;
+}

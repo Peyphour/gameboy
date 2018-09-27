@@ -58,12 +58,26 @@ struct core {
 
 typedef struct core core;
 
+typedef enum {
+    ZERO = 1 << 7,
+    SUB = 1 << 6,
+    HALF = 1 << 5,
+    CARRY = 1 << 4
+} flags;
+
 uint8_t core_ram_read(core *c, uint16_t address);
 void core_ram_write(core *c, uint16_t address, uint8_t value);
 void core_register_op(core *c, uint8_t code, operation op);
 void core_register_ext_op(core *c, uint8_t code, operation op);
 void core_init(core *c);
 void core_loop(core *c);
+void core_stack_push8(core *c, uint8_t val);
+uint8_t core_stack_pop8(core *c);
+void core_stack_push16(core *c, uint16_t val);
+uint16_t core_stack_pop16(core *c);
 void core_setup_operations(core *c);
+void core_toggle_flag(core *c, flags f);
+void core_set_flag(core *c, flags f);
+void core_unset_flag(core *c, flags f);
 
 #endif //GAMEBOY_CORE_H

@@ -20,7 +20,7 @@
 typedef struct {
     char *disassembly;
     char operand_number;
-    void (*handler)(void *core, uint8_t* args);
+    void (*handler)(core *core, uint8_t* args);
 } operation;
 
 struct core {
@@ -79,5 +79,6 @@ void core_setup_operations(core *c);
 void core_toggle_flag(core *c, flags f);
 void core_set_flag(core *c, flags f);
 void core_unset_flag(core *c, flags f);
+uint8_t core_get_flag(core *c, flags f);
 
 #endif //GAMEBOY_CORE_H

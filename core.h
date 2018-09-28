@@ -23,6 +23,11 @@ typedef struct {
     void (*handler)(core *core, uint8_t* args);
 } operation;
 
+typedef enum {
+    true = 1,
+    false = 0
+} bool;
+
 struct core {
     uint8_t ram[RAM_SIZE];
     struct {
@@ -54,6 +59,7 @@ struct core {
     } registers;
     operation ops[256];
     operation ext_ops[256];
+    bool interrupt_enable;
 };
 
 typedef struct core core;

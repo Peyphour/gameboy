@@ -47,11 +47,13 @@ void core_loop(core *c) {
             exit(EXIT_FAILURE);
         }
 
+        printf("%s\n", op.disassembly);
+
         uint8_t *args = malloc(op.operand_number * sizeof(uint8_t));
         for(int i = 0; i < op.operand_number; i++)
             args[i] = core_ram_read(c, c->registers.pc++);
         op.handler(c, args);
-        sleep(1);
+        usleep(10000);
     }
 }
 
@@ -844,9 +846,9 @@ void core_setup_operations(core *c) {
     core_register_op(c, 0xf7, (operation) {
             "RST 30", 0, rst_30
     });
-    core_register_op(c, 0xf8, (operation) {
+    /*core_register_op(c, 0xf8, (operation) {
             "LDHL SP,d", 0, ldhl_sp_d
-    });
+    });*/
     core_register_op(c, 0xf9, (operation) {
             "LD SP,HL", 0, ld_sp_hl
     });
@@ -867,5 +869,774 @@ void core_setup_operations(core *c) {
     });
     core_register_op(c, 0xff, (operation) {
             "RST 38", 0, rst_38
+    });
+
+    core_register_ext_op(c, 0x0, (operation) {
+        "RLC B", 0, rlc_b
+    });
+    core_register_ext_op(c, 0x1, (operation) {
+        "RLC C", 0, rlc_c
+    });
+    core_register_ext_op(c, 0x2, (operation) {
+        "RLC D", 0, rlc_d
+    });
+    core_register_ext_op(c, 0x3, (operation) {
+        "RLC E", 0, rlc_e
+    });
+    core_register_ext_op(c, 0x4, (operation) {
+        "RLC H", 0, rlc_h
+    });
+    core_register_ext_op(c, 0x5, (operation) {
+        "RLC L", 0, rlc_l
+    });
+    core_register_ext_op(c, 0x6, (operation) {
+        "RLC (HL)", 0, rlc_hl
+    });
+    core_register_ext_op(c, 0x7, (operation) {
+        "RLC A", 0, rlc_a
+    });
+    core_register_ext_op(c, 0x8, (operation) {
+        "RRC B", 0, rrc_b
+    });
+    core_register_ext_op(c, 0x9, (operation) {
+        "RRC C", 0, rrc_c
+    });
+    core_register_ext_op(c, 0xa, (operation) {
+        "RRC D", 0, rrc_d
+    });
+    core_register_ext_op(c, 0xb, (operation) {
+        "RRC E", 0, rrc_e
+    });
+    core_register_ext_op(c, 0xc, (operation) {
+        "RRC H", 0, rrc_h
+    });
+    core_register_ext_op(c, 0xd, (operation) {
+        "RRC L", 0, rrc_l
+    });
+    core_register_ext_op(c, 0xe, (operation) {
+        "RRC (HL)", 0, rrc_hl
+    });
+    core_register_ext_op(c, 0xf, (operation) {
+        "RRC A", 0, rrc_a
+    });
+    core_register_ext_op(c, 0x10, (operation) {
+        "RL B", 0, rl_b
+    });
+    core_register_ext_op(c, 0x11, (operation) {
+        "RL C", 0, rl_c
+    });
+    core_register_ext_op(c, 0x12, (operation) {
+        "RL D", 0, rl_d
+    });
+    core_register_ext_op(c, 0x13, (operation) {
+        "RL E", 0, rl_e
+    });
+    core_register_ext_op(c, 0x14, (operation) {
+        "RL H", 0, rl_h
+    });
+    core_register_ext_op(c, 0x15, (operation) {
+        "RL L", 0, rl_l
+    });
+    core_register_ext_op(c, 0x16, (operation) {
+        "RL (HL)", 0, rl_hl
+    });
+    core_register_ext_op(c, 0x17, (operation) {
+        "RL A", 0, rl_a
+    });
+    core_register_ext_op(c, 0x18, (operation) {
+        "RR B", 0, rr_b
+    });
+    core_register_ext_op(c, 0x19, (operation) {
+        "RR C", 0, rr_c
+    });
+    core_register_ext_op(c, 0x1a, (operation) {
+        "RR D", 0, rr_d
+    });
+    core_register_ext_op(c, 0x1b, (operation) {
+        "RR E", 0, rr_e
+    });
+    core_register_ext_op(c, 0x1c, (operation) {
+        "RR H", 0, rr_h
+    });
+    core_register_ext_op(c, 0x1d, (operation) {
+        "RR L", 0, rr_l
+    });
+    core_register_ext_op(c, 0x1e, (operation) {
+        "RR (HL)", 0, rr_hl
+    });
+    core_register_ext_op(c, 0x1f, (operation) {
+        "RR A", 0, rr_a
+    });
+    core_register_ext_op(c, 0x20, (operation) {
+        "SLA B", 0, sla_b
+    });
+    core_register_ext_op(c, 0x21, (operation) {
+        "SLA C", 0, sla_c
+    });
+    core_register_ext_op(c, 0x22, (operation) {
+        "SLA D", 0, sla_d
+    });
+    core_register_ext_op(c, 0x23, (operation) {
+        "SLA E", 0, sla_e
+    });
+    core_register_ext_op(c, 0x24, (operation) {
+        "SLA H", 0, sla_h
+    });
+    core_register_ext_op(c, 0x25, (operation) {
+        "SLA L", 0, sla_l
+    });
+    core_register_ext_op(c, 0x26, (operation) {
+        "SLA (HL)", 0, sla_hl
+    });
+    core_register_ext_op(c, 0x27, (operation) {
+        "SLA A", 0, sla_a
+    });
+    core_register_ext_op(c, 0x28, (operation) {
+        "SRA B", 0, sra_b
+    });
+    core_register_ext_op(c, 0x29, (operation) {
+        "SRA C", 0, sra_c
+    });
+    core_register_ext_op(c, 0x2a, (operation) {
+        "SRA D", 0, sra_d
+    });
+    core_register_ext_op(c, 0x2b, (operation) {
+        "SRA E", 0, sra_e
+    });
+    core_register_ext_op(c, 0x2c, (operation) {
+        "SRA H", 0, sra_h
+    });
+    core_register_ext_op(c, 0x2d, (operation) {
+        "SRA L", 0, sra_l
+    });
+    core_register_ext_op(c, 0x2e, (operation) {
+        "SRA (HL)", 0, sra_hl
+    });
+    core_register_ext_op(c, 0x2f, (operation) {
+        "SRA A", 0, sra_a
+    });
+    core_register_ext_op(c, 0x30, (operation) {
+        "SWAP B", 0, swap_b
+    });
+    core_register_ext_op(c, 0x31, (operation) {
+        "SWAP C", 0, swap_c
+    });
+    core_register_ext_op(c, 0x32, (operation) {
+        "SWAP D", 0, swap_d
+    });
+    core_register_ext_op(c, 0x33, (operation) {
+        "SWAP E", 0, swap_e
+    });
+    core_register_ext_op(c, 0x34, (operation) {
+        "SWAP H", 0, swap_h
+    });
+    core_register_ext_op(c, 0x35, (operation) {
+        "SWAP L", 0, swap_l
+    });
+    core_register_ext_op(c, 0x36, (operation) {
+        "SWAP (HL)", 0, swap_hl
+    });
+    core_register_ext_op(c, 0x37, (operation) {
+        "SWAP A", 0, swap_a
+    });
+    core_register_ext_op(c, 0x38, (operation) {
+        "SRL B", 0, srl_b
+    });
+    core_register_ext_op(c, 0x39, (operation) {
+        "SRL C", 0, srl_c
+    });
+    core_register_ext_op(c, 0x3a, (operation) {
+        "SRL D", 0, srl_d
+    });
+    core_register_ext_op(c, 0x3b, (operation) {
+        "SRL E", 0, srl_e
+    });
+    core_register_ext_op(c, 0x3c, (operation) {
+        "SRL H", 0, srl_h
+    });
+    core_register_ext_op(c, 0x3d, (operation) {
+        "SRL L", 0, srl_l
+    });
+    core_register_ext_op(c, 0x3e, (operation) {
+        "SRL (HL)", 0, srl_hl
+    });
+    core_register_ext_op(c, 0x3f, (operation) {
+        "SRL A", 0, srl_a
+    });
+    core_register_ext_op(c, 0x40, (operation) {
+        "BIT 0,B", 0, bit_0_b
+    });
+    core_register_ext_op(c, 0x41, (operation) {
+        "BIT 0,C", 0, bit_0_c
+    });
+    core_register_ext_op(c, 0x42, (operation) {
+        "BIT 0,D", 0, bit_0_d
+    });
+    core_register_ext_op(c, 0x43, (operation) {
+        "BIT 0,E", 0, bit_0_e
+    });
+    core_register_ext_op(c, 0x44, (operation) {
+        "BIT 0,H", 0, bit_0_h
+    });
+    core_register_ext_op(c, 0x45, (operation) {
+        "BIT 0,L", 0, bit_0_l
+    });
+    core_register_ext_op(c, 0x46, (operation) {
+        "BIT 0,(HL)", 0, bit_0_hl
+    });
+    core_register_ext_op(c, 0x47, (operation) {
+        "BIT 0,A", 0, bit_0_a
+    });
+    core_register_ext_op(c, 0x48, (operation) {
+        "BIT 1,B", 0, bit_1_b
+    });
+    core_register_ext_op(c, 0x49, (operation) {
+        "BIT 1,C", 0, bit_1_c
+    });
+    core_register_ext_op(c, 0x4a, (operation) {
+        "BIT 1,D", 0, bit_1_d
+    });
+    core_register_ext_op(c, 0x4b, (operation) {
+        "BIT 1,E", 0, bit_1_e
+    });
+    core_register_ext_op(c, 0x4c, (operation) {
+        "BIT 1,H", 0, bit_1_h
+    });
+    core_register_ext_op(c, 0x4d, (operation) {
+        "BIT 1,L", 0, bit_1_l
+    });
+    core_register_ext_op(c, 0x4e, (operation) {
+        "BIT 1,(HL)", 0, bit_1_hl
+    });
+    core_register_ext_op(c, 0x4f, (operation) {
+        "BIT 1,A", 0, bit_1_a
+    });
+    core_register_ext_op(c, 0x50, (operation) {
+        "BIT 2,B", 0, bit_2_b
+    });
+    core_register_ext_op(c, 0x51, (operation) {
+        "BIT 2,C", 0, bit_2_c
+    });
+    core_register_ext_op(c, 0x52, (operation) {
+        "BIT 2,D", 0, bit_2_d
+    });
+    core_register_ext_op(c, 0x53, (operation) {
+        "BIT 2,E", 0, bit_2_e
+    });
+    core_register_ext_op(c, 0x54, (operation) {
+        "BIT 2,H", 0, bit_2_h
+    });
+    core_register_ext_op(c, 0x55, (operation) {
+        "BIT 2,L", 0, bit_2_l
+    });
+    core_register_ext_op(c, 0x56, (operation) {
+        "BIT 2,(HL)", 0, bit_2_hl
+    });
+    core_register_ext_op(c, 0x57, (operation) {
+        "BIT 2,A", 0, bit_2_a
+    });
+    core_register_ext_op(c, 0x58, (operation) {
+        "BIT 3,B", 0, bit_3_b
+    });
+    core_register_ext_op(c, 0x59, (operation) {
+        "BIT 3,C", 0, bit_3_c
+    });
+    core_register_ext_op(c, 0x5a, (operation) {
+        "BIT 3,D", 0, bit_3_d
+    });
+    core_register_ext_op(c, 0x5b, (operation) {
+        "BIT 3,E", 0, bit_3_e
+    });
+    core_register_ext_op(c, 0x5c, (operation) {
+        "BIT 3,H", 0, bit_3_h
+    });
+    core_register_ext_op(c, 0x5d, (operation) {
+        "BIT 3,L", 0, bit_3_l
+    });
+    core_register_ext_op(c, 0x5e, (operation) {
+        "BIT 3,(HL)", 0, bit_3_hl
+    });
+    core_register_ext_op(c, 0x5f, (operation) {
+        "BIT 3,A", 0, bit_3_a
+    });
+    core_register_ext_op(c, 0x60, (operation) {
+        "BIT 4,B", 0, bit_4_b
+    });
+    core_register_ext_op(c, 0x61, (operation) {
+        "BIT 4,C", 0, bit_4_c
+    });
+    core_register_ext_op(c, 0x62, (operation) {
+        "BIT 4,D", 0, bit_4_d
+    });
+    core_register_ext_op(c, 0x63, (operation) {
+        "BIT 4,E", 0, bit_4_e
+    });
+    core_register_ext_op(c, 0x64, (operation) {
+        "BIT 4,H", 0, bit_4_h
+    });
+    core_register_ext_op(c, 0x65, (operation) {
+        "BIT 4,L", 0, bit_4_l
+    });
+    core_register_ext_op(c, 0x66, (operation) {
+        "BIT 4,(HL)", 0, bit_4_hl
+    });
+    core_register_ext_op(c, 0x67, (operation) {
+        "BIT 4,A", 0, bit_4_a
+    });
+    core_register_ext_op(c, 0x68, (operation) {
+        "BIT 5,B", 0, bit_5_b
+    });
+    core_register_ext_op(c, 0x69, (operation) {
+        "BIT 5,C", 0, bit_5_c
+    });
+    core_register_ext_op(c, 0x6a, (operation) {
+        "BIT 5,D", 0, bit_5_d
+    });
+    core_register_ext_op(c, 0x6b, (operation) {
+        "BIT 5,E", 0, bit_5_e
+    });
+    core_register_ext_op(c, 0x6c, (operation) {
+        "BIT 5,H", 0, bit_5_h
+    });
+    core_register_ext_op(c, 0x6d, (operation) {
+        "BIT 5,L", 0, bit_5_l
+    });
+    core_register_ext_op(c, 0x6e, (operation) {
+        "BIT 5,(HL)", 0, bit_5_hl
+    });
+    core_register_ext_op(c, 0x6f, (operation) {
+        "BIT 5,A", 0, bit_5_a
+    });
+    core_register_ext_op(c, 0x70, (operation) {
+        "BIT 6,B", 0, bit_6_b
+    });
+    core_register_ext_op(c, 0x71, (operation) {
+        "BIT 6,C", 0, bit_6_c
+    });
+    core_register_ext_op(c, 0x72, (operation) {
+        "BIT 6,D", 0, bit_6_d
+    });
+    core_register_ext_op(c, 0x73, (operation) {
+        "BIT 6,E", 0, bit_6_e
+    });
+    core_register_ext_op(c, 0x74, (operation) {
+        "BIT 6,H", 0, bit_6_h
+    });
+    core_register_ext_op(c, 0x75, (operation) {
+        "BIT 6,L", 0, bit_6_l
+    });
+    core_register_ext_op(c, 0x76, (operation) {
+        "BIT 6,(HL)", 0, bit_6_hl
+    });
+    core_register_ext_op(c, 0x77, (operation) {
+        "BIT 6,A", 0, bit_6_a
+    });
+    core_register_ext_op(c, 0x78, (operation) {
+        "BIT 7,B", 0, bit_7_b
+    });
+    core_register_ext_op(c, 0x79, (operation) {
+        "BIT 7,C", 0, bit_7_c
+    });
+    core_register_ext_op(c, 0x7a, (operation) {
+        "BIT 7,D", 0, bit_7_d
+    });
+    core_register_ext_op(c, 0x7b, (operation) {
+        "BIT 7,E", 0, bit_7_e
+    });
+    core_register_ext_op(c, 0x7c, (operation) {
+        "BIT 7,H", 0, bit_7_h
+    });
+    core_register_ext_op(c, 0x7d, (operation) {
+        "BIT 7,L", 0, bit_7_l
+    });
+    core_register_ext_op(c, 0x7e, (operation) {
+        "BIT 7,(HL)", 0, bit_7_hl
+    });
+    core_register_ext_op(c, 0x7f, (operation) {
+        "BIT 7,A", 0, bit_7_a
+    });
+    core_register_ext_op(c, 0x80, (operation) {
+        "RES 0,B", 0, res_0_b
+    });
+    core_register_ext_op(c, 0x81, (operation) {
+        "RES 0,C", 0, res_0_c
+    });
+    core_register_ext_op(c, 0x82, (operation) {
+        "RES 0,D", 0, res_0_d
+    });
+    core_register_ext_op(c, 0x83, (operation) {
+        "RES 0,E", 0, res_0_e
+    });
+    core_register_ext_op(c, 0x84, (operation) {
+        "RES 0,H", 0, res_0_h
+    });
+    core_register_ext_op(c, 0x85, (operation) {
+        "RES 0,L", 0, res_0_l
+    });
+    core_register_ext_op(c, 0x86, (operation) {
+        "RES 0,(HL)", 0, res_0_hl
+    });
+    core_register_ext_op(c, 0x87, (operation) {
+        "RES 0,A", 0, res_0_a
+    });
+    core_register_ext_op(c, 0x88, (operation) {
+        "RES 1,B", 0, res_1_b
+    });
+    core_register_ext_op(c, 0x89, (operation) {
+        "RES 1,C", 0, res_1_c
+    });
+    core_register_ext_op(c, 0x8a, (operation) {
+        "RES 1,D", 0, res_1_d
+    });
+    core_register_ext_op(c, 0x8b, (operation) {
+        "RES 1,E", 0, res_1_e
+    });
+    core_register_ext_op(c, 0x8c, (operation) {
+        "RES 1,H", 0, res_1_h
+    });
+    core_register_ext_op(c, 0x8d, (operation) {
+        "RES 1,L", 0, res_1_l
+    });
+    core_register_ext_op(c, 0x8e, (operation) {
+        "RES 1,(HL)", 0, res_1_hl
+    });
+    core_register_ext_op(c, 0x8f, (operation) {
+        "RES 1,A", 0, res_1_a
+    });
+    core_register_ext_op(c, 0x90, (operation) {
+        "RES 2,B", 0, res_2_b
+    });
+    core_register_ext_op(c, 0x91, (operation) {
+        "RES 2,C", 0, res_2_c
+    });
+    core_register_ext_op(c, 0x92, (operation) {
+        "RES 2,D", 0, res_2_d
+    });
+    core_register_ext_op(c, 0x93, (operation) {
+        "RES 2,E", 0, res_2_e
+    });
+    core_register_ext_op(c, 0x94, (operation) {
+        "RES 2,H", 0, res_2_h
+    });
+    core_register_ext_op(c, 0x95, (operation) {
+        "RES 2,L", 0, res_2_l
+    });
+    core_register_ext_op(c, 0x96, (operation) {
+        "RES 2,(HL)", 0, res_2_hl
+    });
+    core_register_ext_op(c, 0x97, (operation) {
+        "RES 2,A", 0, res_2_a
+    });
+    core_register_ext_op(c, 0x98, (operation) {
+        "RES 3,B", 0, res_3_b
+    });
+    core_register_ext_op(c, 0x99, (operation) {
+        "RES 3,C", 0, res_3_c
+    });
+    core_register_ext_op(c, 0x9a, (operation) {
+        "RES 3,D", 0, res_3_d
+    });
+    core_register_ext_op(c, 0x9b, (operation) {
+        "RES 3,E", 0, res_3_e
+    });
+    core_register_ext_op(c, 0x9c, (operation) {
+        "RES 3,H", 0, res_3_h
+    });
+    core_register_ext_op(c, 0x9d, (operation) {
+        "RES 3,L", 0, res_3_l
+    });
+    core_register_ext_op(c, 0x9e, (operation) {
+        "RES 3,(HL)", 0, res_3_hl
+    });
+    core_register_ext_op(c, 0x9f, (operation) {
+        "RES 3,A", 0, res_3_a
+    });
+    core_register_ext_op(c, 0xa0, (operation) {
+        "RES 4,B", 0, res_4_b
+    });
+    core_register_ext_op(c, 0xa1, (operation) {
+        "RES 4,C", 0, res_4_c
+    });
+    core_register_ext_op(c, 0xa2, (operation) {
+        "RES 4,D", 0, res_4_d
+    });
+    core_register_ext_op(c, 0xa3, (operation) {
+        "RES 4,E", 0, res_4_e
+    });
+    core_register_ext_op(c, 0xa4, (operation) {
+        "RES 4,H", 0, res_4_h
+    });
+    core_register_ext_op(c, 0xa5, (operation) {
+        "RES 4,L", 0, res_4_l
+    });
+    core_register_ext_op(c, 0xa6, (operation) {
+        "RES 4,(HL)", 0, res_4_hl
+    });
+    core_register_ext_op(c, 0xa7, (operation) {
+        "RES 4,A", 0, res_4_a
+    });
+    core_register_ext_op(c, 0xa8, (operation) {
+        "RES 5,B", 0, res_5_b
+    });
+    core_register_ext_op(c, 0xa9, (operation) {
+        "RES 5,C", 0, res_5_c
+    });
+    core_register_ext_op(c, 0xaa, (operation) {
+        "RES 5,D", 0, res_5_d
+    });
+    core_register_ext_op(c, 0xab, (operation) {
+        "RES 5,E", 0, res_5_e
+    });
+    core_register_ext_op(c, 0xac, (operation) {
+        "RES 5,H", 0, res_5_h
+    });
+    core_register_ext_op(c, 0xad, (operation) {
+        "RES 5,L", 0, res_5_l
+    });
+    core_register_ext_op(c, 0xae, (operation) {
+        "RES 5,(HL)", 0, res_5_hl
+    });
+    core_register_ext_op(c, 0xaf, (operation) {
+        "RES 5,A", 0, res_5_a
+    });
+    core_register_ext_op(c, 0xb0, (operation) {
+        "RES 6,B", 0, res_6_b
+    });
+    core_register_ext_op(c, 0xb1, (operation) {
+        "RES 6,C", 0, res_6_c
+    });
+    core_register_ext_op(c, 0xb2, (operation) {
+        "RES 6,D", 0, res_6_d
+    });
+    core_register_ext_op(c, 0xb3, (operation) {
+        "RES 6,E", 0, res_6_e
+    });
+    core_register_ext_op(c, 0xb4, (operation) {
+        "RES 6,H", 0, res_6_h
+    });
+    core_register_ext_op(c, 0xb5, (operation) {
+        "RES 6,L", 0, res_6_l
+    });
+    core_register_ext_op(c, 0xb6, (operation) {
+        "RES 6,(HL)", 0, res_6_hl
+    });
+    core_register_ext_op(c, 0xb7, (operation) {
+        "RES 6,A", 0, res_6_a
+    });
+    core_register_ext_op(c, 0xb8, (operation) {
+        "RES 7,B", 0, res_7_b
+    });
+    core_register_ext_op(c, 0xb9, (operation) {
+        "RES 7,C", 0, res_7_c
+    });
+    core_register_ext_op(c, 0xba, (operation) {
+        "RES 7,D", 0, res_7_d
+    });
+    core_register_ext_op(c, 0xbb, (operation) {
+        "RES 7,E", 0, res_7_e
+    });
+    core_register_ext_op(c, 0xbc, (operation) {
+        "RES 7,H", 0, res_7_h
+    });
+    core_register_ext_op(c, 0xbd, (operation) {
+        "RES 7,L", 0, res_7_l
+    });
+    core_register_ext_op(c, 0xbe, (operation) {
+        "RES 7,(HL)", 0, res_7_hl
+    });
+    core_register_ext_op(c, 0xbf, (operation) {
+        "RES 7,A", 0, res_7_a
+    });
+    core_register_ext_op(c, 0xc0, (operation) {
+        "SET 0,B", 0, set_0_b
+    });
+    core_register_ext_op(c, 0xc1, (operation) {
+        "SET 0,C", 0, set_0_c
+    });
+    core_register_ext_op(c, 0xc2, (operation) {
+        "SET 0,D", 0, set_0_d
+    });
+    core_register_ext_op(c, 0xc3, (operation) {
+        "SET 0,E", 0, set_0_e
+    });
+    core_register_ext_op(c, 0xc4, (operation) {
+        "SET 0,H", 0, set_0_h
+    });
+    core_register_ext_op(c, 0xc5, (operation) {
+        "SET 0,L", 0, set_0_l
+    });
+    core_register_ext_op(c, 0xc6, (operation) {
+        "SET 0,(HL)", 0, set_0_hl
+    });
+    core_register_ext_op(c, 0xc7, (operation) {
+        "SET 0,A", 0, set_0_a
+    });
+    core_register_ext_op(c, 0xc8, (operation) {
+        "SET 1,B", 0, set_1_b
+    });
+    core_register_ext_op(c, 0xc9, (operation) {
+        "SET 1,C", 0, set_1_c
+    });
+    core_register_ext_op(c, 0xca, (operation) {
+        "SET 1,D", 0, set_1_d
+    });
+    core_register_ext_op(c, 0xcb, (operation) {
+        "SET 1,E", 0, set_1_e
+    });
+    core_register_ext_op(c, 0xcc, (operation) {
+        "SET 1,H", 0, set_1_h
+    });
+    core_register_ext_op(c, 0xcd, (operation) {
+        "SET 1,L", 0, set_1_l
+    });
+    core_register_ext_op(c, 0xce, (operation) {
+        "SET 1,(HL)", 0, set_1_hl
+    });
+    core_register_ext_op(c, 0xcf, (operation) {
+        "SET 1,A", 0, set_1_a
+    });
+    core_register_ext_op(c, 0xd0, (operation) {
+        "SET 2,B", 0, set_2_b
+    });
+    core_register_ext_op(c, 0xd1, (operation) {
+        "SET 2,C", 0, set_2_c
+    });
+    core_register_ext_op(c, 0xd2, (operation) {
+        "SET 2,D", 0, set_2_d
+    });
+    core_register_ext_op(c, 0xd3, (operation) {
+        "SET 2,E", 0, set_2_e
+    });
+    core_register_ext_op(c, 0xd4, (operation) {
+        "SET 2,H", 0, set_2_h
+    });
+    core_register_ext_op(c, 0xd5, (operation) {
+        "SET 2,L", 0, set_2_l
+    });
+    core_register_ext_op(c, 0xd6, (operation) {
+        "SET 2,(HL)", 0, set_2_hl
+    });
+    core_register_ext_op(c, 0xd7, (operation) {
+        "SET 2,A", 0, set_2_a
+    });
+    core_register_ext_op(c, 0xd8, (operation) {
+        "SET 3,B", 0, set_3_b
+    });
+    core_register_ext_op(c, 0xd9, (operation) {
+        "SET 3,C", 0, set_3_c
+    });
+    core_register_ext_op(c, 0xda, (operation) {
+        "SET 3,D", 0, set_3_d
+    });
+    core_register_ext_op(c, 0xdb, (operation) {
+        "SET 3,E", 0, set_3_e
+    });
+    core_register_ext_op(c, 0xdc, (operation) {
+        "SET 3,H", 0, set_3_h
+    });
+    core_register_ext_op(c, 0xdd, (operation) {
+        "SET 3,L", 0, set_3_l
+    });
+    core_register_ext_op(c, 0xde, (operation) {
+        "SET 3,(HL)", 0, set_3_hl
+    });
+    core_register_ext_op(c, 0xdf, (operation) {
+        "SET 3,A", 0, set_3_a
+    });
+    core_register_ext_op(c, 0xe0, (operation) {
+        "SET 4,B", 0, set_4_b
+    });
+    core_register_ext_op(c, 0xe1, (operation) {
+        "SET 4,C", 0, set_4_c
+    });
+    core_register_ext_op(c, 0xe2, (operation) {
+        "SET 4,D", 0, set_4_d
+    });
+    core_register_ext_op(c, 0xe3, (operation) {
+        "SET 4,E", 0, set_4_e
+    });
+    core_register_ext_op(c, 0xe4, (operation) {
+        "SET 4,H", 0, set_4_h
+    });
+    core_register_ext_op(c, 0xe5, (operation) {
+        "SET 4,L", 0, set_4_l
+    });
+    core_register_ext_op(c, 0xe6, (operation) {
+        "SET 4,(HL)", 0, set_4_hl
+    });
+    core_register_ext_op(c, 0xe7, (operation) {
+        "SET 4,A", 0, set_4_a
+    });
+    core_register_ext_op(c, 0xe8, (operation) {
+        "SET 5,B", 0, set_5_b
+    });
+    core_register_ext_op(c, 0xe9, (operation) {
+        "SET 5,C", 0, set_5_c
+    });
+    core_register_ext_op(c, 0xea, (operation) {
+        "SET 5,D", 0, set_5_d
+    });
+    core_register_ext_op(c, 0xeb, (operation) {
+        "SET 5,E", 0, set_5_e
+    });
+    core_register_ext_op(c, 0xec, (operation) {
+        "SET 5,H", 0, set_5_h
+    });
+    core_register_ext_op(c, 0xed, (operation) {
+        "SET 5,L", 0, set_5_l
+    });
+    core_register_ext_op(c, 0xee, (operation) {
+        "SET 5,(HL)", 0, set_5_hl
+    });
+    core_register_ext_op(c, 0xef, (operation) {
+        "SET 5,A", 0, set_5_a
+    });
+    core_register_ext_op(c, 0xf0, (operation) {
+        "SET 6,B", 0, set_6_b
+    });
+    core_register_ext_op(c, 0xf1, (operation) {
+        "SET 6,C", 0, set_6_c
+    });
+    core_register_ext_op(c, 0xf2, (operation) {
+        "SET 6,D", 0, set_6_d
+    });
+    core_register_ext_op(c, 0xf3, (operation) {
+        "SET 6,E", 0, set_6_e
+    });
+    core_register_ext_op(c, 0xf4, (operation) {
+        "SET 6,H", 0, set_6_h
+    });
+    core_register_ext_op(c, 0xf5, (operation) {
+        "SET 6,L", 0, set_6_l
+    });
+    core_register_ext_op(c, 0xf6, (operation) {
+        "SET 6,(HL)", 0, set_6_hl
+    });
+    core_register_ext_op(c, 0xf7, (operation) {
+        "SET 6,A", 0, set_6_a
+    });
+    core_register_ext_op(c, 0xf8, (operation) {
+        "SET 7,B", 0, set_7_b
+    });
+    core_register_ext_op(c, 0xf9, (operation) {
+        "SET 7,C", 0, set_7_c
+    });
+    core_register_ext_op(c, 0xfa, (operation) {
+        "SET 7,D", 0, set_7_d
+    });
+    core_register_ext_op(c, 0xfb, (operation) {
+        "SET 7,E", 0, set_7_e
+    });
+    core_register_ext_op(c, 0xfc, (operation) {
+        "SET 7,H", 0, set_7_h
+    });
+    core_register_ext_op(c, 0xfd, (operation) {
+        "SET 7,L", 0, set_7_l
+    });
+    core_register_ext_op(c, 0xfe, (operation) {
+        "SET 7,(HL)", 0, set_7_hl
+    });
+    core_register_ext_op(c, 0xff, (operation) {
+        "SET 7,A", 0, set_7_a
     });
 }

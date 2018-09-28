@@ -170,6 +170,16 @@ void set(uint8_t *target, uint8_t n) { // set bit n of register
     *target |= (1 << n);
 }
 
+void cp(core *c, uint8_t *target) {
+    if(!c->registers.a - *target)
+        core_set_flag(c, ZERO);
+    core_set_flag(c, SUB);
+    if(*target > c->registers.a)
+        core_set_flag(c, CARRY);
+    if((*target & 0x0f) > (c->registers.a & 0x0f))
+        core_set_flag(c, HALF);
+}
+
 void add(core *c, uint8_t *from) {
     core_unset_flag(c, SUB);
     if(c->registers.a + *from > 0xff)
@@ -560,6 +570,10 @@ void xor_hl(core *c, uint8_t *args) {
     xor(c, &c->ram[c->registers.hl]);
 }
 
+void xor_n(core *c, uint8_t *args) {
+    xor(c, &args[0]);
+}
+
 void rlc_a(core *c, uint8_t *args) {
     rlc(c, &c->registers.a);
 }
@@ -599,6 +613,10 @@ void add_a_hl(core *c, uint8_t *args) {
     add(c, &c->ram[c->registers.b]);
 }
 
+void add_a_n(core *c, uint8_t *args) {
+    add(c, &args[0]);
+}
+
 void add_hl_bc(core *c, uint8_t *args) {
     add16(c, &c->registers.bc, &c->registers.hl);
 }
@@ -635,7 +653,9 @@ void sub_a_l(core *c, uint8_t *args) {
 void sub_a_hl(core *c, uint8_t *args) {
     sub(c, &c->ram[c->registers.b]);
 }
-
+void sub_a_n(core *c, uint8_t *args) {
+    sub(c, &args[0]);
+}
 void and_a(core *c, uint8_t *args) {
     and(c, &c->registers.a);
 }
@@ -659,6 +679,9 @@ void and_l(core *c, uint8_t *args) {
 }
 void and_hl(core *c, uint8_t *args) {
     and(c, &c->ram[c->registers.hl]);
+}
+void and_n(core *c, uint8_t *args) {
+    and(c, &args[0]);
 }
 void or_a(core *c, uint8_t *args) {
     or(c, &c->registers.a);
@@ -684,7 +707,9 @@ void or_l(core *c, uint8_t *args) {
 void or_hl(core *c, uint8_t *args) {
     or(c, &c->ram[c->registers.hl]);
 }
-
+void or_n(core *c, uint8_t *args) {
+    or(c, &args[0]);
+}
 void ldi_hl_a(core *c, uint8_t *args) {
     load(&c->registers.a, &c->ram[c->registers.hl]);
     inc16(&c->registers.hl);
@@ -730,6 +755,10 @@ void adc_a_hl(core *c, uint8_t *args) {
     adc(c, &c->ram[c->registers.hl]);
 }
 
+void adc_a_n(core *c, uint8_t *args) {
+    adc(c, &args[0]);
+}
+
 void sbc_a_a(core *c, uint8_t *args) {
     sbc(c, &c->registers.a);
 }
@@ -751,6 +780,11 @@ void sbc_a_h(core *c, uint8_t *args) {
 void sbc_a_l(core *c, uint8_t *args) {
     sbc(c, &c->registers.l);
 }
+
+void sbc_a_n(core *c, uint8_t *args) {
+    sbc(c, &args[0]);
+}
+
 void sbc_a_hl(core *c, uint8_t *args) {
     sbc(c, &c->ram[c->registers.hl]);
 }
@@ -779,6 +813,123 @@ void jr_n(core *c, uint8_t *args) {
     jump(c, (int8_t) args[0]);
 }
 
+void jp_nz_nn(core *c, uint8_t *args) {
+    if(!core_get_flag(c, ZERO))
+        c->registers.pc = (args[0] << 8 | args[1]);
+}
+
+void jp_z_nn(core *c, uint8_t *args) {
+    if(core_get_flag(c, ZERO))
+        c->registers.pc = (args[0] << 8 | args[1]);
+}
+
+void jp_nc_nn(core *c, uint8_t *args) {
+    if(!core_get_flag(c, CARRY))
+        c->registers.pc = (args[0] << 8 | args[1]);
+}
+
+void jp_c_nn(core *c, uint8_t *args) {
+    if(core_get_flag(c, CARRY))
+        c->registers.pc = (args[0] << 8 | args[1]);
+}
+
+void jp_nn(core *c, uint8_t *args) {
+    c->registers.pc = (args[0] << 8 | args[1]);
+}
+
+void jp_hl(core *c, uint8_t *args) {
+    c->registers.pc = c->ram[c->registers.hl];
+}
+
+void call_nz_nn(core *c, uint8_t *args) {
+    if(!core_get_flag(c, ZERO)) {
+        core_stack_push16(c, c->registers.pc);
+        c->registers.pc = (args[0] << 8 | args[1]);
+    }
+}
+
+void call_z_nn(core *c, uint8_t *args) {
+    if(core_get_flag(c, ZERO)) {
+        core_stack_push16(c, c->registers.pc);
+        c->registers.pc = (args[0] << 8 | args[1]);
+    }
+}
+
+void call_nc_nn(core *c, uint8_t *args) {
+    if(!core_get_flag(c, CARRY)) {
+        core_stack_push16(c, c->registers.pc);
+        c->registers.pc = (args[0] << 8 | args[1]);
+    }
+}
+
+void call_c_nn(core *c, uint8_t *args) {
+    if(core_get_flag(c, CARRY)) {
+        core_stack_push16(c, c->registers.pc);
+        c->registers.pc = (args[0] << 8 | args[1]);
+    }
+}
+
+void call_nn(core *c, uint8_t *args) {
+    core_stack_push16(c, c->registers.pc);
+    c->registers.pc = (args[0] << 8 | args[1]);
+}
+
+void ret_nz(core *c, uint8_t *args) {
+    if(!core_get_flag(c, ZERO))
+        c->registers.pc = core_stack_pop16(c);
+}
+
+void ret_z(core *c, uint8_t *args) {
+    if(core_get_flag(c, ZERO))
+        c->registers.pc = core_stack_pop16(c);
+}
+
+void ret_nc(core *c, uint8_t *args) {
+    if(!core_get_flag(c, CARRY))
+        c->registers.pc = core_stack_pop16(c);
+}
+
+void ret_c(core *c, uint8_t *args) {
+    if(core_get_flag(c, CARRY))
+        c->registers.pc = core_stack_pop16(c);
+}
+
+void ret(core *c, uint8_t *args) {
+    c->registers.pc = core_stack_pop16(c);
+}
+
+void pop_bc(core *c, uint8_t *args) {
+    c->registers.bc = core_stack_pop16(c);
+}
+
+void pop_de(core *c, uint8_t *args) {
+    c->registers.de = core_stack_pop16(c);
+}
+
+void pop_af(core *c, uint8_t *args) {
+    c->registers.af = core_stack_pop16(c);
+}
+
+void pop_hl(core *c, uint8_t *args) {
+    c->registers.hl = core_stack_pop16(c);
+}
+
+void push_bc(core *c, uint8_t *args) {
+    core_stack_push16(c, c->registers.bc);
+}
+
+void push_de(core *c, uint8_t *args) {
+    core_stack_push16(c, c->registers.de);
+}
+
+void push_af(core *c, uint8_t *args) {
+    core_stack_push16(c, c->registers.af);
+}
+
+void push_hl(core *c, uint8_t *args) {
+    core_stack_push16(c, c->registers.hl);
+}
+
 void cpl(core *c, uint8_t *args) {
     c->registers.a = ~c->registers.a;
     core_set_flag(c, SUB | HALF);
@@ -792,6 +943,34 @@ void ccf(core *c, uint8_t *args) {
     core_unset_flag(c, CARRY);
 }
 
+void cp_a(core *c, uint8_t *args) {
+    cp(c, &c->registers.a);
+}
+void cp_b(core *c, uint8_t *args) {
+    cp(c, &c->registers.b);
+}
+void cp_c(core *c, uint8_t *args) {
+    cp(c, &c->registers.c);
+}
+void cp_d(core *c, uint8_t *args) {
+    cp(c, &c->registers.d);
+}
+void cp_e(core *c, uint8_t *args) {
+    cp(c, &c->registers.e);
+}
+void cp_h(core *c, uint8_t *args) {
+    cp(c, &c->registers.h);
+}
+void cp_l(core *c, uint8_t *args) {
+    cp(c, &c->registers.l);
+}
+void cp_hl(core *c, uint8_t *args) {
+    cp(c, &c->ram[c->registers.hl]);
+}
+
+void cp_n(core *c, uint8_t *args) {
+    cp(c, &args[0]);
+}
 void daa(core *c, uint8_t *args) {
     int result = c->registers.a;
     if(core_get_flag(c, SUB)) {

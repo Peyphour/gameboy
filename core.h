@@ -7,7 +7,7 @@
 
 #define BOOTSTRAP_ROM_SIZE 256
 #define RAM_SIZE 65536
-#define DEBUG
+#define DEBUG1
 
 #include <stdint.h>
 #include <stdio.h>
@@ -59,6 +59,7 @@ struct core {
     } registers;
     operation ops[256];
     operation ext_ops[256];
+    uint8_t cycles;
     bool interrupt_enable;
 };
 
@@ -71,7 +72,10 @@ typedef enum {
     CARRY = 1 << 4
 } flags;
 
-uint8_t core_ram_read(core *c, uint16_t address);
+#define CYCLE_DURATION_NS 238
+
+void core_cycle(core *c);
+uint8_t *core_ram_read(core *c, uint16_t address);
 void core_ram_write(core *c, uint16_t address, uint8_t value);
 void core_register_op(core *c, uint8_t code, operation op);
 void core_register_ext_op(core *c, uint8_t code, operation op);

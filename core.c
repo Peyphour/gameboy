@@ -2,15 +2,24 @@
 // Created by bertrand on 27/09/18.
 //
 
+#include <time.h>
 #include "core.h"
 #include "main.h"
 
-uint8_t core_ram_read(core *c, uint16_t address) {
+/**
+ * RAM read/write and jump each takes 4 cycles
+ */
+void core_cycle(core *c) {
+    c->cycles += 4;
+}
+
+uint8_t *core_ram_read(core *c, uint16_t address) {
     assert(address < RAM_SIZE - 1);
 #ifdef DEBUG
     printf("RAM READ ram[%d]=%d\n", address, c->ram[address]);
 #endif
-    return c->ram[address];
+    core_cycle(c);
+    return &c->ram[address];
 }
 
 void core_ram_write(core *c, uint16_t address, uint8_t value) {
@@ -18,6 +27,7 @@ void core_ram_write(core *c, uint16_t address, uint8_t value) {
 #ifdef DEBUG
     printf("RAM WRITE ram[%d]=%d\n", address, value);
 #endif
+    core_cycle(c);
     c->ram[address] = value;
 }
 
@@ -35,25 +45,33 @@ void core_init(core *c) {
 
 void core_loop(core *c) {
     while(1) {
-        uint8_t code = core_ram_read(c, c->registers.pc++);
+        c->cycles = 0;
+        uint8_t code = *core_ram_read(c, c->registers.pc++);
+        operation op;
         if(code == 0xCB) { // extended operation
-            code = core_ram_read(c, c->registers.pc++);
+            code = *core_ram_read(c, c->registers.pc++);
             printf("EXTENDED OP : ");
+            op = c->ext_ops[code];
+        } else {
+            op = c->ops[code];
         }
-        operation op = c->ops[code];
 
         if(op.handler == NULL) {
             printf("UNDEFINED OPERATION %02x\n", code);
             exit(EXIT_FAILURE);
         }
 
-        printf("%s\n", op.disassembly);
 
         uint8_t *args = malloc(op.operand_number * sizeof(uint8_t));
         for(int i = 0; i < op.operand_number; i++)
-            args[i] = core_ram_read(c, c->registers.pc++);
+            args[i] = *core_ram_read(c, c->registers.pc++);
         op.handler(c, args);
-        usleep(10000);
+
+        printf("%s took %d cycles\n", op.disassembly, c->cycles);
+
+        nanosleep(&(struct timespec) {
+            .tv_nsec = c->cycles * CYCLE_DURATION_NS
+        }, NULL);
     }
 }
 
@@ -72,7 +90,7 @@ void core_stack_push8(core *c, uint8_t val) {
 }
 
 uint8_t core_stack_pop8(core *c) {
-    return core_ram_read(c, c->registers.sp++);
+    return *core_ram_read(c, c->registers.sp++);
 }
 
 void core_stack_push16(core *c, uint16_t val) {

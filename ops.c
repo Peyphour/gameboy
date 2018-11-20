@@ -12,6 +12,7 @@ void noop(core *core, uint8_t *args) {
 }
 
 void jump(core *core, uint16_t location) {
+    core_cycle(core);
     core->registers.pc += location;
 }
 
@@ -303,7 +304,7 @@ void inc_l(core *c, uint8_t *args) {
     inc(c, &c->registers.l);
 }
 void inc_hl(core *c, uint8_t *args) {
-    inc(c, &c->ram[c->registers.hl]);
+    inc(c, core_ram_read(c, c->registers.hl));
 }
 
 void inc_bc(core *c, uint8_t *args) {
@@ -351,7 +352,7 @@ void dec_l(core *c, uint8_t *args) {
     dec(c, &c->registers.l);
 }
 void dec_hl(core *c, uint8_t *args) {
-    dec(c, &c->ram[c->registers.hl]);
+    dec(c, core_ram_read(c, c->registers.hl));
 }
 
 void ldh_n_a(core *c, uint8_t *args) {
@@ -436,7 +437,7 @@ void ld_b_l (core *c, uint8_t *args) {
     load(&c->registers.l, &c->registers.b);
 }
 void ld_b_hl (core *c, uint8_t *args) {
-    load(&c->ram[c->registers.hl], &c->registers.b);
+    load(core_ram_read(c, c->registers.hl), &c->registers.b);
 }
 void ld_b_a (core *c, uint8_t *args) {
     load(&c->registers.a, &c->registers.b);
@@ -460,7 +461,7 @@ void ld_c_l (core *c, uint8_t *args) {
     load(&c->registers.l, &c->registers.c);
 }
 void ld_c_hl (core *c, uint8_t *args) {
-    load(&c->ram[c->registers.hl], &c->registers.c);
+    load(core_ram_read(c, c->registers.hl), &c->registers.c);
 }
 void ld_c_a (core *c, uint8_t *args) {
     load(&c->registers.a, &c->registers.c);
@@ -484,7 +485,7 @@ void ld_d_l (core *c, uint8_t *args) {
     load(&c->registers.l, &c->registers.d);
 }
 void ld_d_hl (core *c, uint8_t *args) {
-    load(&c->ram[c->registers.hl], &c->registers.d);
+    load(core_ram_read(c, c->registers.hl), &c->registers.d);
 }
 void ld_d_a (core *c, uint8_t *args) {
     load(&c->registers.a, &c->registers.d);
@@ -508,7 +509,7 @@ void ld_e_l (core *c, uint8_t *args) {
     load(&c->registers.l, &c->registers.e);
 }
 void ld_e_hl (core *c, uint8_t *args) {
-    load(&c->ram[c->registers.hl], &c->registers.e);
+    load(core_ram_read(c, c->registers.hl), &c->registers.e);
 }
 void ld_e_a (core *c, uint8_t *args) {
     load(&c->registers.a, &c->registers.e);
@@ -532,7 +533,7 @@ void ld_h_l (core *c, uint8_t *args) {
     load(&c->registers.l, &c->registers.h);
 }
 void ld_h_hl (core *c, uint8_t *args) {
-    load(&c->ram[c->registers.hl], &c->registers.h);
+    load(core_ram_read(c, c->registers.hl), &c->registers.h);
 }
 void ld_h_a (core *c, uint8_t *args) {
     load(&c->registers.a, &c->registers.h);
@@ -556,31 +557,31 @@ void ld_l_l (core *c, uint8_t *args) {
     load(&c->registers.l, &c->registers.l);
 }
 void ld_l_hl (core *c, uint8_t *args) {
-    load(&c->ram[c->registers.hl], &c->registers.l);
+    load(core_ram_read(c, c->registers.hl), &c->registers.l);
 }
 void ld_l_a (core *c, uint8_t *args) {
     load(&c->registers.a, &c->registers.l);
 }
 void ld_hl_b (core *c, uint8_t *args) {
-    load(&c->registers.b, &c->ram[c->registers.hl]);
+    load(&c->registers.b, core_ram_read(c, c->registers.hl));
 }
 void ld_hl_c (core *c, uint8_t *args) {
-    load(&c->registers.c, &c->ram[c->registers.hl]);
+    load(&c->registers.c, core_ram_read(c, c->registers.hl));
 }
 void ld_hl_d (core *c, uint8_t *args) {
-    load(&c->registers.d, &c->ram[c->registers.hl]);
+    load(&c->registers.d, core_ram_read(c, c->registers.hl));
 }
 void ld_hl_e (core *c, uint8_t *args) {
-    load(&c->registers.e, &c->ram[c->registers.hl]);
+    load(&c->registers.e, core_ram_read(c, c->registers.hl));
 }
 void ld_hl_h (core *c, uint8_t *args) {
-    load(&c->registers.h, &c->ram[c->registers.hl]);
+    load(&c->registers.h, core_ram_read(c, c->registers.hl));
 }
 void ld_hl_l (core *c, uint8_t *args) {
-    load(&c->registers.l, &c->ram[c->registers.hl]);
+    load(&c->registers.l, core_ram_read(c, c->registers.hl));
 }
 void ld_hl_a (core *c, uint8_t *args) {
-    load(&c->registers.a, &c->ram[c->registers.hl]);
+    load(&c->registers.a, core_ram_read(c, c->registers.hl));
 }
 void ld_a_b (core *c, uint8_t *args) {
     load(&c->registers.b, &c->registers.a);
@@ -601,7 +602,7 @@ void ld_a_l (core *c, uint8_t *args) {
     load(&c->registers.l, &c->registers.a);
 }
 void ld_a_hl (core *c, uint8_t *args) {
-    load(&c->ram[c->registers.hl], &c->registers.a);
+    load(core_ram_read(c, c->registers.hl), &c->registers.a);
 }
 void ld_a_a (core *c, uint8_t *args) {
     load(&c->registers.a, &c->registers.a);
@@ -642,7 +643,7 @@ void xor_l(core *c, uint8_t *args) {
 }
 
 void xor_hl(core *c, uint8_t *args) {
-    xor(c, &c->ram[c->registers.hl]);
+    xor(c, core_ram_read(c, c->registers.hl));
 }
 
 void xor_n(core *c, uint8_t *args) {
@@ -762,7 +763,7 @@ void and_l(core *c, uint8_t *args) {
     and(c, &c->registers.l);
 }
 void and_hl(core *c, uint8_t *args) {
-    and(c, &c->ram[c->registers.hl]);
+    and(c, core_ram_read(c, c->registers.hl));
 }
 void and_n(core *c, uint8_t *args) {
     and(c, &args[0]);
@@ -789,28 +790,28 @@ void or_l(core *c, uint8_t *args) {
     or(c, &c->registers.l);
 }
 void or_hl(core *c, uint8_t *args) {
-    or(c, &c->ram[c->registers.hl]);
+    or(c, core_ram_read(c, c->registers.hl));
 }
 void or_n(core *c, uint8_t *args) {
     or(c, &args[0]);
 }
 void ldi_hl_a(core *c, uint8_t *args) {
-    load(&c->registers.a, &c->ram[c->registers.hl]);
+    load(&c->registers.a, core_ram_read(c, c->registers.hl));
     inc16(&c->registers.hl);
 }
 
 void ldi_a_hl(core *c, uint8_t *args) {
-    load(&c->ram[c->registers.hl], &c->registers.a);
+    load(core_ram_read(c, c->registers.hl), &c->registers.a);
     inc16(&c->registers.hl);
 }
 
 void ldd_hl_a(core *c, uint8_t *args) {
-    load(&c->registers.a, &c->ram[c->registers.hl]);
+    load(&c->registers.a, core_ram_read(c, c->registers.hl));
     dec16(&c->registers.hl);
 }
 
 void ldd_a_hl(core *c, uint8_t *args) {
-    load(&c->ram[c->registers.hl], &c->registers.a);
+    load(core_ram_read(c, c->registers.hl), &c->registers.a);
     dec16(&c->registers.hl);
 }
 
@@ -836,7 +837,7 @@ void adc_a_l(core *c, uint8_t *args) {
     adc(c, &c->registers.l);
 }
 void adc_a_hl(core *c, uint8_t *args) {
-    adc(c, &c->ram[c->registers.hl]);
+    adc(c, core_ram_read(c, c->registers.hl));
 }
 
 void adc_a_n(core *c, uint8_t *args) {
@@ -870,7 +871,7 @@ void sbc_a_n(core *c, uint8_t *args) {
 }
 
 void sbc_a_hl(core *c, uint8_t *args) {
-    sbc(c, &c->ram[c->registers.hl]);
+    sbc(c, core_ram_read(c, c->registers.hl));
 }
 
 void jr_nz_n(core *c, uint8_t *args) {
@@ -1054,7 +1055,7 @@ void cp_l(core *c, uint8_t *args) {
     cp(c, &c->registers.l);
 }
 void cp_hl(core *c, uint8_t *args) {
-    cp(c, &c->ram[c->registers.hl]);
+    cp(c, core_ram_read(c, c->registers.hl));
 }
 
 void cp_n(core *c, uint8_t *args) {
@@ -1105,7 +1106,7 @@ void bit_0_l(core *c, uint8_t *args) {
     bit(c, &c->registers.l, 0);
 }
 void bit_0_hl(core *c, uint8_t *args) {
-    bit(c, &c->ram[c->registers.hl], 0);
+    bit(c, core_ram_read(c, c->registers.hl), 0);
 }
 void bit_0_a(core *c, uint8_t *args) {
     bit(c, &c->registers.a, 0);
@@ -1129,7 +1130,7 @@ void bit_1_l(core *c, uint8_t *args) {
     bit(c, &c->registers.l, 1);
 }
 void bit_1_hl(core *c, uint8_t *args) {
-    bit(c, &c->ram[c->registers.hl], 1);
+    bit(c, core_ram_read(c, c->registers.hl), 1);
 }
 void bit_1_a(core *c, uint8_t *args) {
     bit(c, &c->registers.a, 1);
@@ -1153,7 +1154,7 @@ void bit_2_l(core *c, uint8_t *args) {
     bit(c, &c->registers.l, 2);
 }
 void bit_2_hl(core *c, uint8_t *args) {
-    bit(c, &c->ram[c->registers.hl], 2);
+    bit(c, core_ram_read(c, c->registers.hl), 2);
 }
 void bit_2_a(core *c, uint8_t *args) {
     bit(c, &c->registers.a, 2);
@@ -1177,7 +1178,7 @@ void bit_3_l(core *c, uint8_t *args) {
     bit(c, &c->registers.l, 3);
 }
 void bit_3_hl(core *c, uint8_t *args) {
-    bit(c, &c->ram[c->registers.hl], 3);
+    bit(c, core_ram_read(c, c->registers.hl), 3);
 }
 void bit_3_a(core *c, uint8_t *args) {
     bit(c, &c->registers.a, 3);
@@ -1201,7 +1202,7 @@ void bit_4_l(core *c, uint8_t *args) {
     bit(c, &c->registers.l, 4);
 }
 void bit_4_hl(core *c, uint8_t *args) {
-    bit(c, &c->ram[c->registers.hl], 4);
+    bit(c, core_ram_read(c, c->registers.hl), 4);
 }
 void bit_4_a(core *c, uint8_t *args) {
     bit(c, &c->registers.a, 4);
@@ -1225,7 +1226,7 @@ void bit_5_l(core *c, uint8_t *args) {
     bit(c, &c->registers.l, 5);
 }
 void bit_5_hl(core *c, uint8_t *args) {
-    bit(c, &c->ram[c->registers.hl], 5);
+    bit(c, core_ram_read(c, c->registers.hl), 5);
 }
 void bit_5_a(core *c, uint8_t *args) {
     bit(c, &c->registers.a, 5);
@@ -1249,7 +1250,7 @@ void bit_6_l(core *c, uint8_t *args) {
     bit(c, &c->registers.l, 6);
 }
 void bit_6_hl(core *c, uint8_t *args) {
-    bit(c, &c->ram[c->registers.hl], 6);
+    bit(c, core_ram_read(c, c->registers.hl), 6);
 }
 void bit_6_a(core *c, uint8_t *args) {
     bit(c, &c->registers.a, 6);
@@ -1273,7 +1274,7 @@ void bit_7_l(core *c, uint8_t *args) {
     bit(c, &c->registers.l, 7);
 }
 void bit_7_hl(core *c, uint8_t *args) {
-    bit(c, &c->ram[c->registers.hl], 7);
+    bit(c, core_ram_read(c, c->registers.hl), 7);
 }
 void bit_7_a(core *c, uint8_t *args) {
     bit(c, &c->registers.a, 7);
@@ -1297,7 +1298,7 @@ void res_0_l(core *c, uint8_t *args) {
     res(&c->registers.l, 0);
 }
 void res_0_hl(core *c, uint8_t *args) {
-    res(&c->ram[c->registers.hl], 0);
+    res(core_ram_read(c, c->registers.hl), 0);
 }
 void res_0_a(core *c, uint8_t *args) {
     res(&c->registers.a, 0);
@@ -1321,7 +1322,7 @@ void res_1_l(core *c, uint8_t *args) {
     res(&c->registers.l, 1);
 }
 void res_1_hl(core *c, uint8_t *args) {
-    res(&c->ram[c->registers.hl], 1);
+    res(core_ram_read(c, c->registers.hl), 1);
 }
 void res_1_a(core *c, uint8_t *args) {
     res(&c->registers.a, 1);
@@ -1345,7 +1346,7 @@ void res_2_l(core *c, uint8_t *args) {
     res(&c->registers.l, 2);
 }
 void res_2_hl(core *c, uint8_t *args) {
-    res(&c->ram[c->registers.hl], 2);
+    res(core_ram_read(c, c->registers.hl), 2);
 }
 void res_2_a(core *c, uint8_t *args) {
     res(&c->registers.a, 2);
@@ -1369,7 +1370,7 @@ void res_3_l(core *c, uint8_t *args) {
     res(&c->registers.l, 3);
 }
 void res_3_hl(core *c, uint8_t *args) {
-    res(&c->ram[c->registers.hl], 3);
+    res(core_ram_read(c, c->registers.hl), 3);
 }
 void res_3_a(core *c, uint8_t *args) {
     res(&c->registers.a, 3);
@@ -1393,7 +1394,7 @@ void res_4_l(core *c, uint8_t *args) {
     res(&c->registers.l, 4);
 }
 void res_4_hl(core *c, uint8_t *args) {
-    res(&c->ram[c->registers.hl], 4);
+    res(core_ram_read(c, c->registers.hl), 4);
 }
 void res_4_a(core *c, uint8_t *args) {
     res(&c->registers.a, 4);
@@ -1417,7 +1418,7 @@ void res_5_l(core *c, uint8_t *args) {
     res(&c->registers.l, 5);
 }
 void res_5_hl(core *c, uint8_t *args) {
-    res(&c->ram[c->registers.hl], 5);
+    res(core_ram_read(c, c->registers.hl), 5);
 }
 void res_5_a(core *c, uint8_t *args) {
     res(&c->registers.a, 5);
@@ -1441,7 +1442,7 @@ void res_6_l(core *c, uint8_t *args) {
     res(&c->registers.l, 6);
 }
 void res_6_hl(core *c, uint8_t *args) {
-    res(&c->ram[c->registers.hl], 6);
+    res(core_ram_read(c, c->registers.hl), 6);
 }
 void res_6_a(core *c, uint8_t *args) {
     res(&c->registers.a, 6);
@@ -1465,7 +1466,7 @@ void res_7_l(core *c, uint8_t *args) {
     res(&c->registers.l, 7);
 }
 void res_7_hl(core *c, uint8_t *args) {
-    res(&c->ram[c->registers.hl], 7);
+    res(core_ram_read(c, c->registers.hl), 7);
 }
 void res_7_a(core *c, uint8_t *args) {
     res(&c->registers.a, 7);
@@ -1489,7 +1490,7 @@ void set_0_l(core *c, uint8_t *args) {
     set(&c->registers.l, 0);
 }
 void set_0_hl(core *c, uint8_t *args) {
-    set(&c->ram[c->registers.hl], 0);
+    set(core_ram_read(c, c->registers.hl), 0);
 }
 void set_0_a(core *c, uint8_t *args) {
     set(&c->registers.a, 0);
@@ -1513,7 +1514,7 @@ void set_1_l(core *c, uint8_t *args) {
     set(&c->registers.l, 1);
 }
 void set_1_hl(core *c, uint8_t *args) {
-    set(&c->ram[c->registers.hl], 1);
+    set(core_ram_read(c, c->registers.hl), 1);
 }
 void set_1_a(core *c, uint8_t *args) {
     set(&c->registers.a, 1);
@@ -1537,7 +1538,7 @@ void set_2_l(core *c, uint8_t *args) {
     set(&c->registers.l, 2);
 }
 void set_2_hl(core *c, uint8_t *args) {
-    set(&c->ram[c->registers.hl], 2);
+    set(core_ram_read(c, c->registers.hl), 2);
 }
 void set_2_a(core *c, uint8_t *args) {
     set(&c->registers.a, 2);
@@ -1561,7 +1562,7 @@ void set_3_l(core *c, uint8_t *args) {
     set(&c->registers.l, 3);
 }
 void set_3_hl(core *c, uint8_t *args) {
-    set(&c->ram[c->registers.hl], 3);
+    set(core_ram_read(c, c->registers.hl), 3);
 }
 void set_3_a(core *c, uint8_t *args) {
     set(&c->registers.a, 3);
@@ -1585,7 +1586,7 @@ void set_4_l(core *c, uint8_t *args) {
     set(&c->registers.l, 4);
 }
 void set_4_hl(core *c, uint8_t *args) {
-    set(&c->ram[c->registers.hl], 4);
+    set(core_ram_read(c, c->registers.hl), 4);
 }
 void set_4_a(core *c, uint8_t *args) {
     set(&c->registers.a, 4);
@@ -1609,7 +1610,7 @@ void set_5_l(core *c, uint8_t *args) {
     set(&c->registers.l, 5);
 }
 void set_5_hl(core *c, uint8_t *args) {
-    set(&c->ram[c->registers.hl], 5);
+    set(core_ram_read(c, c->registers.hl), 5);
 }
 void set_5_a(core *c, uint8_t *args) {
     set(&c->registers.a, 5);
@@ -1633,7 +1634,7 @@ void set_6_l(core *c, uint8_t *args) {
     set(&c->registers.l, 6);
 }
 void set_6_hl(core *c, uint8_t *args) {
-    set(&c->ram[c->registers.hl], 6);
+    set(core_ram_read(c, c->registers.hl), 6);
 }
 void set_6_a(core *c, uint8_t *args) {
     set(&c->registers.a, 6);
@@ -1657,7 +1658,7 @@ void set_7_l(core *c, uint8_t *args) {
     set(&c->registers.l, 7);
 }
 void set_7_hl(core *c, uint8_t *args) {
-    set(&c->ram[c->registers.hl], 7);
+    set(core_ram_read(c, c->registers.hl), 7);
 }
 void set_7_a(core *c, uint8_t *args) {
     set(&c->registers.a, 7);
@@ -1682,7 +1683,7 @@ void rlc_l(core *c, uint8_t *args) {
     rlc(c, &c->registers.l);
 }
 void rlc_hl(core *c, uint8_t *args) {
-    rlc(c, &c->ram[c->registers.hl]);
+    rlc(c, core_ram_read(c, c->registers.hl));
 }
 void rrc_b(core *c, uint8_t *args) {
     rrc(c, &c->registers.b);
@@ -1703,7 +1704,7 @@ void rrc_l(core *c, uint8_t *args) {
     rrc(c, &c->registers.l);
 }
 void rrc_hl(core *c, uint8_t *args) {
-    rrc(c, &c->ram[c->registers.hl]);
+    rrc(c, core_ram_read(c, c->registers.hl));
 }
 void rl_b(core *c, uint8_t *args) {
     rl(c,  &c->registers.b);
@@ -1724,7 +1725,7 @@ void rl_l(core *c, uint8_t *args) {
     rl(c,  &c->registers.l);
 }
 void rl_hl(core *c, uint8_t *args) {
-    rl(c,  &c->ram[c->registers.hl]);
+    rl(c,  core_ram_read(c, c->registers.hl));
 }
 void rr_b(core *c, uint8_t *args) {
     rr(c, &c->registers.b);
@@ -1745,7 +1746,7 @@ void rr_l(core *c, uint8_t *args) {
     rr(c, &c->registers.l);
 }
 void rr_hl(core *c, uint8_t *args) {
-    rr(c, &c->ram[c->registers.hl]);
+    rr(c, core_ram_read(c, c->registers.hl));
 }
 void sla_b(core *c, uint8_t *args) {
     sla(c, &c->registers.b);
@@ -1766,7 +1767,7 @@ void sla_l(core *c, uint8_t *args) {
     sla(c, &c->registers.l);
 }
 void sla_hl(core *c, uint8_t *args) {
-    sla(c, &c->ram[c->registers.hl]);
+    sla(c, core_ram_read(c, c->registers.hl));
 }
 void sla_a(core *c, uint8_t *args) {
     sla(c, &c->registers.a);
@@ -1790,7 +1791,7 @@ void sra_l(core *c, uint8_t *args) {
     sra(c, &c->registers.l);
 }
 void sra_hl(core *c, uint8_t *args) {
-    sra(c, &c->ram[c->registers.hl]);
+    sra(c, core_ram_read(c, c->registers.hl));
 }
 void sra_a(core *c, uint8_t *args) {
     sra(c, &c->registers.a);
@@ -1814,7 +1815,7 @@ void swap_l(core *c, uint8_t *args) {
     swap(c, &c->registers.l);
 }
 void swap_hl(core *c, uint8_t *args) {
-    swap(c, &c->ram[c->registers.hl]);
+    swap(c, core_ram_read(c, c->registers.hl));
 }
 void swap_a(core *c, uint8_t *args) {
     swap(c, &c->registers.a);
@@ -1838,7 +1839,7 @@ void srl_l(core *c, uint8_t *args) {
     srl(c,  &c->registers.l);
 }
 void srl_hl(core *c, uint8_t *args) {
-    srl(c,  &c->ram[c->registers.hl]);
+    srl(c,  core_ram_read(c, c->registers.hl));
 }
 void srl_a(core *c, uint8_t *args) {
     srl(c,  &c->registers.a);
